@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entraînement au badgeage</title>
+<style>
+  :root{
+    --bg:#f6f3ee; --card:#ffffff; --ink:#1d2433; --muted:#5a6273;
+    --primary:#1f5fbf; --primary-dark:#174a96; --ok:#1e7a46; --warn:#b3261e;
+    --line:#d9d4ca; --soft:#e8f0fb;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI",Roboto,Arial,sans-serif;font-size:22px;line-height:1.45}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 18px 60px}
+  header{text-align:center;margin-bottom:18px}
+  header h1{font-size:1.6rem;margin:0 0 4px}
+  header p{margin:0;color:var(--muted);font-size:1rem}
+
+  .steps{display:flex;justify-content:center;gap:10px;margin:18px 0 22px;flex-wrap:wrap}
+  .step{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;
+    background:#ece7de;color:var(--muted);font-size:.9rem;font-weight:600}
+  .step b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;
+    background:#fff;color:var(--muted)}
+  .step.active{background:var(--primary);color:#fff}
+  .step.active b{color:var(--primary)}
+  .step.done{background:#d6ecdf;color:var(--ok)}
+  .step.done b{color:var(--ok)}
+
+  .card{background:var(--card);border-radius:20px;padding:28px 24px;
+    box-shadow:0 2px 0 var(--line),0 8px 24px rgba(0,0,0,.06)}
+  .card h2{font-size:1.35rem;margin:0 0 6px}
+  .hint{color:var(--muted);font-size:1rem;margin:0 0 20px}
+
+  label.big{display:block;font-weight:700;margin:22px 0 8px;font-size:1.05rem}
+  input[type=text],input[type=date],input[type=time]{
+    width:100%;font-size:1.15rem;padding:16px 18px;border:3px solid var(--line);
+    border-radius:14px;background:#fff;color:var(--ink);min-height:64px}
+  input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--soft)}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:560px){.row{grid-template-columns:1fr}}
+  .block{border:2px solid var(--line);border-radius:16px;padding:18px;margin-top:18px}
+  .block h3{margin:0 0 4px;font-size:1.15rem;display:flex;align-items:center;gap:10px}
+  .tag{font-size:.8rem;padding:4px 10px;border-radius:8px;color:#fff}
+  .tag.in{background:var(--ok)} .tag.out{background:#8a4b0f}
+  .mini{margin-top:10px;font-size:.95rem;padding:10px 16px;min-height:52px;
+    background:var(--soft);color:var(--primary-dark);border:2px solid #b9cdea;
+    border-radius:12px;font-weight:700;cursor:pointer}
+  .mini:hover{background:#d8e6f8}
+
+  .places{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+  @media (max-width:560px){.places{grid-template-columns:1fr}}
+  .place{display:flex;align-items:center;gap:12px;padding:16px;min-height:70px;
+    border:3px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;
+    font-size:1.05rem;font-weight:600;text-align:left;color:var(--ink)}
+  .place .ico{font-size:1.6rem}
+  .place.sel{border-color:var(--primary);background:var(--soft)}
+  #otherPlace{margin-top:12px;display:none}
+
+  .actions{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap}
+  .btn{flex:1;min-width:200px;font-size:1.15rem;font-weight:700;padding:18px 22px;
+    min-height:68px;border-radius:16px;border:none;cursor:pointer}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-dark)}
+  .btn.ghost{background:#fff;color:var(--ink);border:3px solid var(--line)}
+  .btn.ok{background:var(--ok);color:#fff}
+
+  .error{display:none;margin-top:16px;padding:14px 16px;border-radius:12px;
+    background:#fbe9e7;color:var(--warn);font-weight:600;font-size:1rem}
+  .error.show{display:block}
+
+  .success{text-align:center}
+  .success .big-ico{font-size:4rem;line-height:1}
+  .recap{text-align:left;margin:22px 0 0;border:2px solid var(--line);border-radius:16px;overflow:hidden}
+  .recap div{display:flex;justify-content:space-between;gap:12px;padding:14px 18px;
+    border-bottom:2px solid var(--line);font-size:1.05rem}
+  .recap div:last-child{border-bottom:none}
+  .recap span:first-child{color:var(--muted)}
+  .recap span:last-child{font-weight:700;text-align:right}
+
+  .history{margin-top:26px}
+  .history h3{font-size:1.1rem;margin:0 0 10px}
+  .history ul{list-style:none;padding:0;margin:0}
+  .history li{padding:12px 14px;border-radius:12px;background:#f2efe9;margin-bottom:8px;font-size:.95rem}
+
+  .screen{display:none}
+  .screen.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .clock{text-align:center;font-size:1rem;color:var(--muted);margin-top:4px}
+  .clock strong{color:var(--ink);font-size:1.3rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🕒 Entraînement au badgeage</h1>
+    <p>Un exercice pour apprendre à pointer son arrivée et son départ, sans risque d'erreur.</p>
+    <div class="clock">Il est <strong id="clock">--:--</strong></div>
+  </header>
+
+  <div class="steps" aria-hidden="true">
+    <div class="step" id="st1"><b>1</b> Votre nom</div>
+    <div class="step" id="st2"><b>2</b> Horaires et lieu</div>
+    <div class="step" id="st3"><b>3</b> Confirmation</div>
+  </div>
+
+  <!-- Écran 1 : nom -->
+  <section class="screen card" id="screen1">
+    <h2>Bonjour ! Comment vous appelez-vous ?</h2>
+    <p class="hint">Touchez la case blanche, puis écrivez votre prénom et votre nom.</p>
+    <form id="formName" novalidate>
+      <label class="big" for="firstName">Prénom</label>
+      <input type="text" id="firstName" autocomplete="given-name" placeholder="Exemple : Marie">
+      <label class="big" for="lastName">Nom</label>
+      <input type="text" id="lastName" autocomplete="family-name" placeholder="Exemple : Dupont">
+      <div class="error" id="err1"></div>
+      <div class="actions">
+        <button type="submit" class="btn primary">Continuer ➜</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Écran 2 : horaires + lieu -->
+  <section class="screen card" id="screen2">
+    <h2 id="hello">Bonjour</h2>
+    <p class="hint">Indiquez quand vous commencez, quand vous finissez, et où vous travaillez.</p>
+    <form id="formShift" novalidate>
+      <div class="block">
+        <h3><span class="tag in">ARRIVÉE</span> Début du travail</h3>
+        <div class="row">
+          <div><label class="big" for="startDate">Date</label><input type="date" id="startDate"></div>
+          <div><label class="big" for="startTime">Heure</label><input type="time" id="startTime"></div>
+        </div>
+        <button type="button" class="mini" data-now="start">📍 Mettre la date et l'heure de maintenant</button>
+      </div>
+
+      <div class="block">
+        <h3><span class="tag out">DÉPART</span> Fin du travail</h3>
+        <div class="row">
+          <div><label class="big" for="endDate">Date</label><input type="date" id="endDate"></div>
+          <div><label class="big" for="endTime">Heure</label><input type="time" id="endTime"></div>
+        </div>
+        <button type="button" class="mini" data-now="end">📍 Mettre la date et l'heure de maintenant</button>
+      </div>
+
+      <div class="block">
+        <h3>📌 Lieu de travail</h3>
+        <p class="hint" style="margin:4px 0 0">Touchez le lieu où vous travaillez.</p>
+        <div class="places" id="places">
+          <button type="button" class="place" data-place="Bureau"><span class="ico">🏢</span>Bureau</button>
+          <button type="button" class="place" data-place="Télétravail (domicile)"><span class="ico">🏠</span>Télétravail (domicile)</button>
+          <button type="button" class="place" data-place="Magasin / Accueil"><span class="ico">🛒</span>Magasin / Accueil</button>
+          <button type="button" class="place" data-place="Atelier / Entrepôt"><span class="ico">🏭</span>Atelier / Entrepôt</button>
+          <button type="button" class="place" data-place="Chez un client"><span class="ico">🚗</span>Chez un client</button>
+          <button type="button" class="place" data-place="__autre"><span class="ico">✏️</span>Autre lieu</button>
+        </div>
+        <input type="text" id="otherPlace" placeholder="Écrivez le nom du lieu">
+      </div>
+
+      <div class="error" id="err2"></div>
+      <div class="actions">
+        <button type="button" class="btn ghost" id="back2">⬅ Retour</button>
+        <button type="submit" class="btn primary">Valider mon badgeage ✔</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Écran 3 : confirmation -->
+  <section class="screen card success" id="screen3">
+    <div class="big-ico">✅</div>
+    <h2>Bravo, votre badgeage est enregistré !</h2>
+    <p class="hint">Ceci est un exercice : rien n'est envoyé à votre employeur.</p>
+    <div class="recap" id="recap"></div>
+    <div class="actions">
+      <button type="button" class="btn ghost" id="edit">✏️ Modifier</button>
+      <button type="button" class="btn ok" id="again">🔁 Recommencer l'exercice</button>
+    </div>
+    <div class="history" id="historyBox" style="display:none">
+      <h3>Vos essais pendant cette séance</h3>
+      <ul id="history"></ul>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2,'0');
+  const state = { first:'', last:'', place:'', history:[] };
+
+  function tick(){ const d=new Date(); $('clock').textContent = pad(d.getHours())+':'+pad(d.getMinutes()); }
+  tick(); setInterval(tick, 15000);
+
+  function show(n){
+    [1,2,3].forEach(i=>{
+      $('screen'+i).classList.toggle('on', i===n);
+      const st=$('st'+i); st.classList.toggle('active', i===n); st.classList.toggle('done', i<n);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+    const f = n===1 ? $('firstName') : null; if(f) setTimeout(()=>f.focus(),200);
+  }
+  function err(id,msg){ const e=$(id); e.textContent = msg ? '⚠️ '+msg : ''; e.classList.toggle('show',!!msg); }
+  const cap = s => s.trim().replace(/\s+/g,' ').toLowerCase().replace(/(^|[\s-])\p{L}/gu, m=>m.toUpperCase());
+
+  // Étape 1
+  $('formName').addEventListener('submit', e=>{
+    e.preventDefault();
+    const f=$('firstName').value.trim(), l=$('lastName').value.trim();
+    if(!f){ err('err1','Merci d\'écrire votre prénom.'); $('firstName').focus(); return; }
+    if(!l){ err('err1','Merci d\'écrire votre nom.'); $('lastName').focus(); return; }
+    err('err1'); state.first=cap(f); state.last=l.trim().toUpperCase();
+    $('hello').textContent = 'Bonjour '+state.first+' 👋';
+    const t=new Date(), today=t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());
+    if(!$('startDate').value) $('startDate').value=today;
+    if(!$('endDate').value) $('endDate').value=today;
+    show(2);
+  });
+
+  // Boutons "maintenant"
+  document.querySelectorAll('[data-now]').forEach(b=>b.addEventListener('click',()=>{
+    const d=new Date(), k=b.dataset.now;
+    $(k+'Date').value = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    $(k+'Time').value = pad(d.getHours())+':'+pad(d.getMinutes());
+  }));
+
+  // Lieux
+  document.querySelectorAll('.place').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.place').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    const other = b.dataset.place==='__autre';
+    $('otherPlace').style.display = other ? 'block' : 'none';
+    state.place = other ? '__autre' : b.dataset.place;
+    if(other) $('otherPlace').focus();
+  }));
+
+  $('back2').addEventListener('click',()=>show(1));
+
+  const fmtDate = v => { const [y,m,d]=v.split('-').map(Number);
+    return new Date(y,m-1,d).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); };
+
+  // Étape 2
+  $('formShift').addEventListener('submit', e=>{
+    e.preventDefault();
+    const sd=$('startDate').value, st=$('startTime').value, ed=$('endDate').value, et=$('endTime').value;
+    if(!sd||!st) return err('err2','Indiquez la date et l\'heure de début.');
+    if(!ed||!et) return err('err2','Indiquez la date et l\'heure de fin.');
+    const s=new Date(sd+'T'+st), en=new Date(ed+'T'+et);
+    if(en<=s) return err('err2','L\'heure de fin doit être après l\'heure de début.');
+    let place = state.place;
+    if(!place) return err('err2','Choisissez votre lieu de travail.');
+    if(place==='__autre'){ place=$('otherPlace').value.trim(); if(!place) return err('err2','Écrivez le nom de votre lieu de travail.'); }
+    err('err2');
+
+    const mins=Math.round((en-s)/60000), h=Math.floor(mins/60), m=mins%60;
+    const dur = h+' h '+pad(m);
+    const rows = [
+      ['Nom', state.first+' '+state.last],
+      ['Arrivée', fmtDate(sd)+' à '+st.replace(':',' h ')],
+      ['Départ', fmtDate(ed)+' à '+et.replace(':',' h ')],
+      ['Durée', dur],
+      ['Lieu', place]
+    ];
+    $('recap').innerHTML='';
+    rows.forEach(([k,v])=>{ const d=document.createElement('div');
+      const a=document.createElement('span'); a.textContent=k;
+      const b=document.createElement('span'); b.textContent=v;
+      d.append(a,b); $('recap').appendChild(d); });
+
+    state.history.unshift(st+' → '+et+' · '+place+' · '+dur);
+    $('history').innerHTML='';
+    state.history.slice(0,8).forEach(t=>{ const li=document.createElement('li'); li.textContent='✔ '+t; $('history').appendChild(li); });
+    $('historyBox').style.display = state.history.length>1 ? 'block' : 'none';
+    show(3);
+  });
+
+  $('edit').addEventListener('click',()=>show(2));
+  $('again').addEventListener('click',()=>{
+    ['startTime','endTime','otherPlace'].forEach(id=>$(id).value='');
+    document.querySelectorAll('.place').forEach(x=>x.classList.remove('sel'));
+    $('otherPlace').style.display='none'; state.place='';
+    show(2);
+  });
+
+  show(1);
+})();
+</script>
+</body>
+</html>
